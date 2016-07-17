@@ -1,4 +1,5 @@
 from world2d import *
+import re
 
 class RPGObject(Object):
     def __init__(self, tile=None, name="Object", maxhealth=0, attack=0, defense=0, inventory=[]):
@@ -7,8 +8,23 @@ class RPGObject(Object):
         self.defense=defense
         self.attack=attack
         self.inventory=inventory
+        self.health=maxhealth
     def setMaxHealth(self, maxhealth):
         self.maxhealth=maxhealth
+    def damage(self, damage):
+        self.health-=damage
+        print(self.name + " took " + str(damage) + " damage!")
+        if self.health<=0:
+            print(self.name + " died!")
+            self.tile.removeObject(self)
+        else:
+            print(self.name + " now has " + str(self.health) + " health.")
+    def heal(self, heal):
+        print(self.name + " healed " + str(heal) + " health!")
+        self.health+=heal
+        if self.health>self.maxhealth:
+            self.health=maxhealth
+        print(self.name + " now has " + str(self.health) + " health.")
     def setDefense(self, defense):
         self.defense=defense
     def setAttack(self, attack):
@@ -17,8 +33,10 @@ class RPGObject(Object):
         self.inventory.append(item)
     def removeFromInventory(self, index):
         self.inventory.pop(index)
-    def getmaxhealth(self):
+    def getMaxHealth(self):
         return self.maxhealth
+    def getHealth(self):
+        return self.health
     def getDefense(self):
         return self.defense
     def getAttack(self):
@@ -27,15 +45,40 @@ class RPGObject(Object):
         return self.inventory
 
 class Enemy(RPGObject):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=20, defense=0, attack=2, inventory=[]):
+    def __init__(self, tile=None, name="Object", pos=0, maxhealth=20, defense=0, attack=2, inventory=[], exp=20):
         RPGObject.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
+        self.exp=exp
+    def setExp(self, exp):
+        self.exp=exp
+    def getExp(self):
+        return self.exp
 
 class Player(RPGObject):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=20, defense=0, attack=2, inventory=[], level=1, exp=0, equipment=set()):
+    def __init__(self, tile=None, name="You", pos=0, maxhealth=20, defense=0, attack=2, inventory=[], level=1, exp=0, equipment=set()):
         RPGObject.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
         self.level=level
         self.exp=exp
         self.equipment=equipment
+    def doAttack(self):
+        targets=[]
+        for i in self.tile.getObjects():
+            targets.append(i)
+        print("What would you like to attack? 0 to cancel. WARNING: CANCELLING WILL SKIP YOUR TURN")
+        for i in range(len(targets)):
+            print(str(i+1) + ". " + targets[i].getName() + ", Health: " + str(targets[i].getHealth()))
+        targeti=input()
+        isnumber = re.match(re.compile('^\d+$'), targeti)
+        while (not isnumber) or int(targeti)>len(targets) or int(targeti)<0:
+            print("That is not a valid target")
+            targeti=input()
+            isnumber = re.match(re.compile('^\d+$'), targeti)
+        if targeti==0:
+            return
+        target=targets[int(targeti)-1]
+        print("You attacked " + target.getName())
+        target.damage(self.attack)
+        if not target in self.tile.getObjects():
+            self.gainExp(self.target.getExp)
     def turn(self):
         commands=["n","s","e","w","a","x"]
         print("What would you like to do?")
@@ -56,6 +99,8 @@ class Player(RPGObject):
         elif command=="w":
             self.moveWest()
             print("You moved west.")
+        elif command=="a":
+            self.doAttack()
         elif command=="x":
             print("You skipped your turn")
     def levelUp(self):
