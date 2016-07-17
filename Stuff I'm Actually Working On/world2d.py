@@ -1,31 +1,28 @@
 import copy
 
 class Object:
-    def __init__(self, tile=None, name="Object", pos=0):
+    def __init__(self, tile=None, name="Object"):
         self.tile=tile
         self.name=name
-        self.pos=pos
     def setTile(self, tile):
         self.tile=tile
     def setName(self, name):
         self.name=name
     def setSize(self, size):
         self.size=size
-    def setPos(self, pos):
-        self.pos=pos
     def turn(self):
         pass
     def moveNorth(self):
-        self.tile.removeObject(self.pos)
+        self.tile.removeObject(self)
         self.tile.getWorld().getPos(self.tile.getPos()[0]-1, self.tile.getPos()[1]).addObjectShallow(self)
     def moveSouth(self):
-        self.tile.removeObject(self.pos)
+        self.tile.removeObject(self)
         self.tile.getWorld().getPos(self.tile.getPos()[0]+1, self.tile.getPos()[1]).addObjectShallow(self)
     def moveEast(self):
-        self.tile.removeObject(self.pos)
+        self.tile.removeObject(self)
         self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]+1).addObjectShallow(self)
     def moveWest(self):
-        self.tile.removeObject(self.pos)
+        self.tile.removeObject(self)
         self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]-1).addObjectShallow(self)
     def getTile(self):
         return self.tile
@@ -33,15 +30,14 @@ class Object:
         return self.name
     def getSize(self):
         return self.size
-    def getPos(self):
-        return self.pos
 
 class Tile:
-    def __init__(self, world=None, objects=[]):
+    def __init__(self, world=None, objects=set()):
         self.world=world
         self.objects=objects
         self.pos=(0,0)
         self.calibrate()
+        self.shouldRemove=set()
     def setPos(self, row, col):
         self.pos=(row,col)
         self.calibrate()
@@ -49,22 +45,24 @@ class Tile:
         self.world=world
         self.calibrate()
     def turn(self):
-        for i in range(len(self.objects)):
-            self.objects[i].turn()
+        for i in self.objects:
+            i.turn()
+        for i in self.shouldRemove:
+            self.objects.remove(i)
+        self.shouldRemove=set()
         self.calibrate()
     def addObject(self, obj):
-        self.objects.append(copy.deepcopy(obj))
+        self.objects.add(copy.deepcopy(obj))
         self.calibrate()
     def addObjectShallow(self, obj):
-        self.objects.append(obj)
+        self.objects.add(obj)
         self.calibrate()
-    def removeObject(self, pos):
-        self.objects.pop(pos)
-        self.calibrate()
+    def removeObject(self, obj):
+        if obj in self.objects:
+            self.shouldRemove.add(obj)
     def calibrate(self):
-        for i in range(len(self.objects)):
-            self.objects[i].setTile(self)
-            self.objects[i].setPos(i)
+        for i in self.objects:
+            i.setTile(self)
     def getWorld(self):
         return self.world
     def getPos(self):
