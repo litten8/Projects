@@ -17,19 +17,16 @@ class Object:
         pass
     def moveNorth(self):
         self.tile.removeObject(self.pos)
-        self.tile.getWorld().getPos(self.tile.getPos()[0]-1, self.tile.getPos()[1]).addObject(self)
+        self.tile.getWorld().getPos(self.tile.getPos()[0]-1, self.tile.getPos()[1]).addObjectShallow(self)
     def moveSouth(self):
         self.tile.removeObject(self.pos)
-        self.tile.getWorld().getPos(self.tile.getPos()[0]+1, self.tile.getPos()[1]).addObject(self)
+        self.tile.getWorld().getPos(self.tile.getPos()[0]+1, self.tile.getPos()[1]).addObjectShallow(self)
     def moveEast(self):
-        for i in range(len(self.tile.getObjects())):
-            if self.tile.getObjects()[i]==self:
-                self.tile.removeObject(self.pos)
-                break
-        self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]+1).addObject(self)
+        self.tile.removeObject(self.pos)
+        self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]+1).addObjectShallow(self)
     def moveWest(self):
         self.tile.removeObject(self.pos)
-        self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]-1).addObject(self)
+        self.tile.getWorld().getPos(self.tile.getPos()[0], self.tile.getPos()[1]-1).addObjectShallow(self)
     def getTile(self):
         return self.tile
     def getName(self):
@@ -57,6 +54,9 @@ class Tile:
         self.calibrate()
     def addObject(self, obj):
         self.objects.append(copy.deepcopy(obj))
+        self.calibrate()
+    def addObjectShallow(self, obj):
+        self.objects.append(obj)
         self.calibrate()
     def removeObject(self, pos):
         self.objects.pop(pos)

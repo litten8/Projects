@@ -1,7 +1,6 @@
 from world2d import *
 import random
 
-# working on this
 class EcoObject(Object):
     def __init__(self, tile=None, name="Rock", pos=0, size=1.0, shade=0, ground=True):
         Object.__init__(self, tile=tile, name=name, pos=pos)
