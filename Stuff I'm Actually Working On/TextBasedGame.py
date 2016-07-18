@@ -12,7 +12,7 @@ class RPGObject(Object):
     def setMaxHealth(self, maxhealth):
         self.maxhealth=maxhealth
     def damage(self, damage):
-        self.health-=damage
+        self.health-=damage-self.defense
         print(self.name + " took " + str(damage) + " damage!")
         if self.health<=0:
             print(self.name + " died!")
@@ -45,9 +45,20 @@ class RPGObject(Object):
         return self.inventory
 
 class Enemy(RPGObject):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=20, defense=0, attack=2, inventory=[], exp=20):
+    def __init__(self, tile=None, name="Slime", pos=0, maxhealth=20, defense=0, attack=2, inventory=[], exp=20):
         RPGObject.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
         self.exp=exp
+    def doAttack(self):
+        target=None
+        for i in self.tile.getObjects():
+            if type(i)==Player:
+                target=i
+                break
+        if target:
+            print(self.name + " attacked " + target.getName() + "!")
+            target.damage(self.attack)
+    def turn(self):
+        self.doAttack()
     def setExp(self, exp):
         self.exp=exp
     def getExp(self):
@@ -69,17 +80,21 @@ class Player(RPGObject):
         targeti=input()
         isnumber = re.match(re.compile('^\d+$'), targeti)
         while (not isnumber) or int(targeti)>len(targets) or int(targeti)<0:
-            print("That is not a valid target")
+            print("That is not a valid target.")
             targeti=input()
             isnumber = re.match(re.compile('^\d+$'), targeti)
         if targeti==0:
             return
         target=targets[int(targeti)-1]
-        print("You attacked " + target.getName())
+        print("You attacked " + target.getName() + "!")
         target.damage(self.attack)
-        if not target in self.tile.getObjects():
-            self.gainExp(self.target.getExp)
+        if target in self.tile.getShouldRemove():
+            if type(target)==Enemy:
+                self.gainExp(target.getExp())
     def turn(self):
+        for i in self.tile.getObjects():
+            if not i==self:
+                print("There is " + i.getName() + " nearby with " + str(i.getHealth()) + " health.")
         commands=["n","s","e","w","a","x"]
         print("What would you like to do?")
         command=input()
@@ -122,9 +137,9 @@ class Player(RPGObject):
     def gainExp(self, exp):
         print("You gained " + str(exp) + " EXP!")
         self.exp+=exp
-        while self.exp>=level*100:
+        while self.exp>=self.level*100:
             self.levelUp()
-            self.exp-=level*100
+            self.exp-=self.level*100
     def addEquipment(self, equipment):
         self.equipment.add(equipment)
     def removeEquipment(self, equipment):
@@ -138,15 +153,15 @@ class Player(RPGObject):
         return self.exp
 
 class Item(RPGObject):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=1, defense=0, attack=0, inventory=[]):
+    def __init__(self, tile=None, name="Potion", pos=0, maxhealth=1, defense=0, attack=0, inventory=[]):
         RPGObject.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
 
 class Structure(RPGObject):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=100, defense=10, attack=0, inventory=[]):
+    def __init__(self, tile=None, name="House", pos=0, maxhealth=100, defense=10, attack=0, inventory=[]):
         RPGObject.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
 
 class Equipment(Item):
-    def __init__(self, tile=None, name="Object", pos=0, maxhealth=1, defense=0, attack=0, inventory=[]):
+    def __init__(self, tile=None, name="Sword", pos=0, maxhealth=1, defense=0, attack=0, inventory=[]):
         Item.__init__(self, tile=tile, name=name, maxhealth=maxhealth, defense=defense, attack=attack, inventory=inventory)
 
 class RPGTile(Tile):
@@ -168,5 +183,6 @@ class RPGWorld(World):
         self.world[r][c].setTileType(tileType)
 
 world=RPGWorld(100,100)
+world.addObjectToTile(Enemy(), 0, 0)
 while True:
     world.turn()

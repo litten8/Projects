@@ -46,7 +46,8 @@ class Tile:
         self.calibrate()
     def turn(self):
         for i in self.objects:
-            i.turn()
+            if not i in self.shouldRemove:
+                i.turn()
         for i in self.shouldRemove:
             self.objects.remove(i)
         self.shouldRemove=set()
@@ -69,6 +70,8 @@ class Tile:
         return self.pos
     def getObjects(self):
         return self.objects
+    def getShouldRemove(self):
+        return self.shouldRemove
 
 class World:
     def __init__(self, rows, cols, fill=Tile()):
