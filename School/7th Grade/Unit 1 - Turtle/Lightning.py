@@ -1,3 +1,6 @@
+# This was very interesting lightning.  I liked the way the bolts moved, and
+#   the color changes.  
+
 import turtle
 import time as misha
 import random
