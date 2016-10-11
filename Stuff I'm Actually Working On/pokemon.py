@@ -1,5 +1,5 @@
 class Pokemon:
-    def __init__(self, types, moves, movenames, ability, arena, x=0, y=0, z=0, size=1, weight=10, atk=10, sat=10, dfs=10, sdf=10, mhp=20, spd=1, jump=1, fly=False, acc=1, level=1):
+    def __init__(self, types, moves, movenames, ability, arena, x=0, y=0, z=0, size=1, weight=10, atk=10, sat=10, dfs=10, sdf=10, mhp=20, spd=1, jump=1, fly=False, acc=1, level=1, name="Pokemon"):
         self.types=types
         self.moves=moves
         self.movenames=movenames
@@ -21,6 +21,7 @@ class Pokemon:
         self.jump=jump
         self.fly=fly
         self.level=level
+        self.name=name
     def useMove(self, i):
         self.moves[i](self)
     def damage(self, damage, phys, types):
@@ -45,7 +46,7 @@ class Pokemon:
         command=""
         self.usedMove=False
         while command!="end":
-            print("what would you like to do? (type help for help anytime)")
+            print("what will " + self.name + " do? (type help for help anytime)")
             command=input()
             if command=="help":
                 print("move: use a move")
@@ -66,21 +67,44 @@ class Pokemon:
                             if movei>=1 and movei<=len(self.moves):
                                 self.useMove(movei-1)
                                 self.usedMove=True
+                                break
                             else:
                                 print("that number is not valid")
                         elif movei=="help":
                             print("type the number before a move to use it")
-                            print("type cancel to go back")
-                        else:
-                            if movei!="cancel":
-                                print("that isn't even a number")
+                            print("type cancel to go back to the main screen")
+                        elif movei!="cancel":
+                            print("that isn't even a number")
                 else:
                     print("your pokemon can only use one move per turn")
             elif command=="info":
                 infocommand=""
+                z=0
                 while infocommand!="back":
-                    print(self.arena.toString(0))
+                    print(self.arena.toString(z))
                     infocommand=input()
+                    if infocommand=="help":
+                        print("- means an empty space")
+                        print("P means there is a pokemon")
+                        print("V means there is a projectile")
+                        print("type up to look higher")
+                        print("type down to look lower")
+                        print("type back to go back to the main screen")
+                        print("type target to target a specific location to get info on")
+                    elif infocommand=="up":
+                        z+=1
+                        if z>=self.arena.height:
+                            z-=1
+                    elif infocommand=="down":
+                        z-=1
+                        if z<0:
+                            z+=1
+                    elif infocommand=="target":
+                        print("what x position would you like to target?")
+                        x=input()
+                        print("what y position would you like to target?")
+                        y=input()
+                        self.arena.tileInfo(x,y,z)
             else:
                 print("that is not a valid command")
 
@@ -129,12 +153,30 @@ class Arena:
         self.width=width
         self.height=height
         self.length=length
-        self.arena=[[[set() for k in range(self.length)] for j in range(self.height)] for i in range(self.width)]
+        self.arena=[[[set() for k in range(self.height)] for j in range(self.length)] for i in range(self.width)]
     def addObject(self, o, x, y, z):
         self.arena[x][y][z].add(o)
     def move(self, o, x1, y1, z1, x2, y2, z2):
         self.arena[x1][y1][z1].remove(o)
         self.arena[x2][y2][z2].add(o)
+    def toString(self, z):
+        returns=""
+        for x in range(self.width):
+            line=""
+            for y in range(self.height):
+                for o in self.arena[x][y][z]:
+                    if type(o)==Pokemon:
+                        line+="P"
+                        break
+                    elif type(o)==Projectile:
+                        line+="V"
+                        break
+                if len(self.arena[x][y][z])==0:
+                    line+="-"
+            returns+=line+"\n"
+        return returns
+    def tileInfo(self, x, y, z):
+        
 
 class Projectile:
     pass
@@ -150,6 +192,9 @@ class Ability:
 ##############################################################################################################################################
 ##############################################################################################################################################
 
+def move(poke):
+    pass
+
 a=Arena(10,10,10)
-litten=Pokemon(Types("fire"),[move],["move"],None,a)
-litten.playerTurn()
+torracat=Pokemon(Types("fire"),[move],["move"],None,a,x=5,y=5,name="Torracat")
+torracat.playerTurn()

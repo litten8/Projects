@@ -1,3 +1,6 @@
+# This is a nice effect. Perhaps using "manual updates" (with the tracer set to 0)
+#   would make it run a little faster.  
+
 from turtle import *
 import random
 
