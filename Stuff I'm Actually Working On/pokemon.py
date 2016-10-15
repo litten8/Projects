@@ -298,7 +298,7 @@ def tackle(poke):
 def quickattack(poke):
     pass
 
-def roar(poke):
+def growl(poke):
     pass
 
 def shadowsneak(poke):
