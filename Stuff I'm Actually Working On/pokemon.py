@@ -295,15 +295,27 @@ def ember(poke):
 def tackle(poke):
     pass
 
-def ghostball(poke):
+def quickattack(poke):
+    pass
+
+def roar(poke):
+    pass
+
+def shadowsneak(poke):
+    pass
+
+def shadowpunch(poke):
+    pass
+
+def shadowball(poke):
     pass
 
 def willowisp(poke):
     pass
 
 a=Arena(10,10,10)
-torracat=Pokemon(Types("fire"),[move, ember, tackle],["move", "ember"],None,a,x=5,y=0,name="Torracat")
-dusklops=Pokemon(Types("ghost"),[move, ghostball, willowisp],["move", "ghostball"],None,a,x=5,y=9,name="Dusklops", fly=True)
+torracat=Pokemon(Types("fire"),[move, ember, tackle, quickattack],["move", "ember", "tackle", "quick attack"],None,a,x=5,y=0,name="Torracat")
+dusclops=Pokemon(Types("ghost"),[move, shadowball, shadowpunch, shadowsneak, willowisp],["move", "shadow ball", "shadow punch", "shadow sneak", "will-o-wisp"],None,a,x=5,y=9,name="Dusclops", fly=True)
 while True:
     torracat.playerTurn()
-    dusklops.playerTurn()
+    dusclops.playerTurn()
